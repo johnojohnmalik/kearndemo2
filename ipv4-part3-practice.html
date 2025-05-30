@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPv4 Part 3: Practice Quiz</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .question-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--primary-color);
+            overflow-x: auto;
+            word-wrap: break-word;
+        }
+
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            word-wrap: break-word;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .option {
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateX(10px);
+        }
+
+        .option.selected {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .answer {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 5px;
+            display: none;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .explanation {
+            margin-top: 10px;
+            font-style: italic;
+            color: var(--text-color);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .next-button {
+            padding: 15px 30px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid var(--primary-color);
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .next-button:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .binary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: monospace;
+            table-layout: fixed;
+        }
+
+        .binary-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .binary-table .header {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .binary-table .value {
+            color: var(--accent-color);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.1);
+            margin-bottom: 20px;
+            border-radius: 2px;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .question-number {
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .result-container {
+            text-align: center;
+            display: none;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            padding: 20px;
+        }
+
+        .result-container h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .score {
+            font-size: 2em;
+            color: var(--accent-color);
+            margin: 20px 0;
+        }
+
+        .restart-button {
+            padding: 15px 30px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid var(--primary-color);
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .restart-button:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .option.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+        }
+
+        .option.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: #F44336;
+        }
+
+        .option.correct.selected {
+            background: rgba(76, 175, 80, 0.3);
+        }
+
+        .option.incorrect.selected {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        .celebration-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        .celebration-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 10px;
+            border: 2px solid var(--primary-color);
+            text-align: center;
+            opacity: 0;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        .celebration-message h2 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 0 0 10px var(--primary-color);
+        }
+
+        .celebration-message p {
+            color: var(--accent-color);
+            font-size: 1.5em;
+            margin: 10px 0 0;
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+
+        .cyber-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        @keyframes particleAnimation {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="celebration-container" id="celebrationContainer"></div>
+    <div class="quiz-container">
+        <div class="progress-bar">
+            <div class="progress" style="width: 0%"></div>
+        </div>
+        <div class="question-number">Question 1 of 30</div>
+        <div class="question-container">
+            <div class="question">What is the binary representation of the IP address 192.168.1.1?</div>
+            <div class="binary-table">
+                <tr>
+                    <td class="header">128</td>
+                    <td class="header">64</td>
+                    <td class="header">32</td>
+                    <td class="header">16</td>
+                    <td class="header">8</td>
+                    <td class="header">4</td>
+                    <td class="header">2</td>
+                    <td class="header">1</td>
+                </tr>
+            </div>
+            <div class="options">
+                <div class="option">A) 11000000.10101000.00000001.00000001</div>
+                <div class="option">B) 11000000.10101000.00000001.00000010</div>
+                <div class="option">C) 11000000.10101000.00000001.00000100</div>
+                <div class="option">D) 11000000.10101000.00000001.00001000</div>
+            </div>
+            <div class="answer">
+                <div class="answer-text"></div>
+                <div class="explanation"></div>
+            </div>
+            <button class="next-button">Next Question</button>
+        </div>
+        <div class="result-container">
+            <h2>Quiz Complete!</h2>
+            <div class="score">Your Score: <span id="final-score">0</span>/30</div>
+            <button class="restart-button">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the binary representation of the IP address 192.168.1.1?",
+                type: "binary",
+                options: [
+                    "11000000.10101000.00000001.00000001",
+                    "11000000.10101000.00000001.00000010",
+                    "11000000.10101000.00000001.00000100",
+                    "11000000.10101000.00000001.00001000"
+                ],
+                answer: 0,
+                explanation: "Each octet in an IP address must be exactly 8 bits. For 192.168.1.1, the binary values are calculated by adding the bit values (128, 64, 32, 16, 8, 4, 2, 1) that sum to each decimal number. The other options incorrectly change the last octet's value, breaking the decimal-to-binary conversion."
+            },
+            {
+                question: "Which class of IP address has the most hosts per network?",
+                type: "multiple",
+                options: [
+                    "Class A",
+                    "Class B",
+                    "Class C",
+                    "Class D"
+                ],
+                answer: 0,
+                explanation: "Class A uses 24 bits for hosts (2^24 - 2 = 16,777,214 hosts), while Class B uses 16 bits (65,534 hosts) and Class C uses 8 bits (254 hosts). Class D is for multicast, not host addressing. The large host space makes Class A ideal for massive networks."
+            },
+            {
+                question: "What is the leading bit pattern for Class B addresses?",
+                type: "multiple",
+                options: [
+                    "0",
+                    "10",
+                    "110",
+                    "1110"
+                ],
+                answer: 1,
+                explanation: "Class B addresses must start with '10' because this pattern identifies the first two octets as the network portion. '0' is for Class A (first octet only), '110' for Class C (first three octets), and '1110' for Class D (multicast)."
+            },
+            {
+                question: "Convert the binary IP address 00001010.00000000.00000000.00000001 to decimal.",
+                type: "binary",
+                options: [
+                    "10.0.0.1",
+                    "10.0.0.2",
+                    "10.0.0.4",
+                    "10.0.0.8"
+                ],
+                answer: 0,
+                explanation: "To convert binary to decimal, add the values of bits set to 1: 00001010 = 8+2 = 10, 00000000 = 0, 00000001 = 1. The other options incorrectly double the last octet's value, which is a common conversion error."
+            },
+            {
+                question: "How many usable hosts are available in a Class C network?",
+                type: "multiple",
+                options: [
+                    "254",
+                    "255",
+                    "256",
+                    "512"
+                ],
+                answer: 0,
+                explanation: "Class C networks have 254 usable hosts because they use 8 bits for hosts (2^8 = 256 total addresses), but two addresses are reserved: the network address (all host bits 0) and broadcast address (all host bits 1). The other options either include these reserved addresses or double the actual number."
+            },
+            {
+                question: "What is the range of first octet values for Class A addresses?",
+                type: "multiple",
+                options: [
+                    "1-126",
+                    "128-191",
+                    "192-223",
+                    "224-239"
+                ],
+                answer: 0,
+                explanation: "Class A addresses range from 1-126 because they must start with 0 in binary. 0 is reserved for default routes, and 127 is reserved for loopback. The other ranges are for Class B (128-191), Class C (192-223), and Class D (224-239)."
+            },
+            {
+                question: "Convert the IP address 172.16.0.1 to binary.",
+                type: "binary",
+                options: [
+                    "10101100.00010000.00000000.00000001",
+                    "10101100.00010000.00000000.00000010",
+                    "10101100.00010000.00000000.00000100",
+                    "10101100.00010000.00000000.00001000"
+                ],
+                answer: 0,
+                explanation: "Each octet converts to 8 bits: 172 = 10101100 (128+32+8+4), 16 = 00010000 (16), 0 = 00000000, 1 = 00000001. The other options incorrectly double the last octet's value, which is a common binary conversion error."
+            },
+            {
+                question: "What is the purpose of Class D addresses?",
+                type: "multiple",
+                options: [
+                    "Multicast communication",
+                    "Regular host addressing",
+                    "Broadcast communication",
+                    "Private network addressing"
+                ],
+                answer: 0,
+                explanation: "Class D addresses (224.0.0.0 to 239.255.255.255) are specifically designed for multicast, where one sender can reach multiple receivers simultaneously. They cannot be used for regular host addressing, broadcast, or private networks, which are common misconceptions."
+            },
+            {
+                question: "How many Class B networks are possible?",
+                type: "multiple",
+                options: [
+                    "16,384",
+                    "32,768",
+                    "65,536",
+                    "131,072"
+                ],
+                answer: 0,
+                explanation: "Class B networks have 14 usable bits for the network portion (after the fixed '10' prefix), giving 2^14 = 16,384 possible networks. The other options are incorrect because they either double the number (32,768) or use the wrong bit calculation (65,536, 131,072)."
+            },
+            {
+                question: "What is the binary representation of 255.255.255.0?",
+                type: "binary",
+                options: [
+                    "11111111.11111111.11111111.00000000",
+                    "11111111.11111111.00000000.11111111",
+                    "11111111.00000000.11111111.11111111",
+                    "00000000.11111111.11111111.11111111"
+                ],
+                answer: 0,
+                explanation: "255 converts to 11111111 (all bits 1) and 0 to 00000000 (all bits 0). This is a common subnet mask where the first three octets are all 1s, indicating the network portion. The other options incorrectly mix 1s and 0s, which would create invalid subnet masks."
+            },
+            {
+                question: "Which class has the most networks but the fewest hosts per network?",
+                type: "multiple",
+                options: [
+                    "Class C",
+                    "Class B",
+                    "Class A",
+                    "Class D"
+                ],
+                answer: 0,
+                explanation: "Class C has the most networks (2,097,152) because it uses 21 bits for the network portion, but only 8 bits for hosts (254 usable hosts). Class A has the fewest networks, and Class D is for multicast, not regular networks."
+            },
+            {
+                question: "What is the first possible Class B address?",
+                type: "multiple",
+                options: [
+                    "128.0.0.0",
+                    "129.0.0.0",
+                    "130.0.0.0",
+                    "131.0.0.0"
+                ],
+                answer: 0,
+                explanation: "128.0.0.0 is the first Class B address because Class B must start with '10' in binary, making 128 (10000000) the smallest possible first octet. The other options are larger Class B addresses, which is a common misconception about network boundaries."
+            },
+            {
+                question: "Convert the binary IP address 11000000.10101000.00000001.00000001 to decimal.",
+                type: "binary",
+                options: [
+                    "192.168.1.1",
+                    "192.168.1.2",
+                    "192.168.1.4",
+                    "192.168.1.8"
+                ],
+                answer: 0,
+                explanation: "To convert binary to decimal, add the values of bits set to 1: 11000000 = 128+64 = 192, 10101000 = 128+32+8 = 168, 00000001 = 1. The other options incorrectly double the last octet's value, which is a common conversion error."
+            },
+            {
+                question: "What is the last possible Class A address?",
+                type: "multiple",
+                options: [
+                    "126.255.255.255",
+                    "127.255.255.255",
+                    "128.255.255.255",
+                    "129.255.255.255"
+                ],
+                answer: 0,
+                explanation: "126.255.255.255 is the last Class A address because Class A must start with 0 in binary, limiting the first octet to 0-126. 127 is reserved for loopback, and 128+ is for Class B. The other options either include reserved addresses or are in the wrong class."
+            },
+            {
+                question: "How many bits are used for the host portion in a Class B address?",
+                type: "multiple",
+                options: [
+                    "16",
+                    "24",
+                    "8",
+                    "32"
+                ],
+                answer: 0,
+                explanation: "Class B addresses use 16 bits for hosts (last two octets) because the first two octets are used for the network portion. 24 bits is for Class A, 8 bits for Class C, and 32 is the total IP address length. This is a common misconception about address class boundaries."
+            },
+            {
+                question: "What is the binary representation of 10.0.0.1?",
+                type: "binary",
+                options: [
+                    "00001010.00000000.00000000.00000001",
+                    "00001010.00000000.00000000.00000010",
+                    "00001010.00000000.00000000.00000100",
+                    "00001010.00000000.00000000.00001000"
+                ],
+                answer: 0,
+                explanation: "Each octet converts to 8 bits: 10 = 00001010 (8+2), 0 = 00000000, 1 = 00000001. The other options incorrectly double the last octet's value, which is a common binary conversion error."
+            },
+            {
+                question: "Which class is most commonly used for small networks?",
+                type: "multiple",
+                options: [
+                    "Class C",
+                    "Class B",
+                    "Class A",
+                    "Class D"
+                ],
+                answer: 0,
+                explanation: "Class C is most common for small networks because it provides 254 usable hosts, which is sufficient for most small organizations. Class A and B would waste addresses, and Class D is for multicast, not regular networks. This is a practical consideration in network design."
+            },
+            {
+                question: "What is the range of first octet values for Class C addresses?",
+                type: "multiple",
+                options: [
+                    "192-223",
+                    "224-239",
+                    "240-255",
+                    "128-191"
+                ],
+                answer: 0,
+                explanation: "Class C addresses range from 192-223 because they must start with '110' in binary. 224-239 is for Class D, 240-255 is for Class E, and 128-191 is for Class B. This is a fundamental concept in IP address classification."
+            },
+            {
+                question: "How many usable networks are there in Class A?",
+                type: "multiple",
+                options: [
+                    "126",
+                    "128",
+                    "256",
+                    "512"
+                ],
+                answer: 0,
+                explanation: "Class A has 126 usable networks because the first octet range is 1-126. 0 is reserved for default routes, and 127 is reserved for loopback. The other options are incorrect because they include reserved addresses or use wrong calculations."
+            },
+            {
+                question: "What is the binary representation of 127.0.0.1?",
+                type: "binary",
+                options: [
+                    "01111111.00000000.00000000.00000001",
+                    "01111111.00000000.00000000.00000010",
+                    "01111111.00000000.00000000.00000100",
+                    "01111111.00000000.00000000.00001000"
+                ],
+                answer: 0,
+                explanation: "Each octet converts to 8 bits: 127 = 01111111 (64+32+16+8+4+2+1), 0 = 00000000, 1 = 00000001. The other options incorrectly double the last octet's value, which is a common binary conversion error."
+            },
+            {
+                question: "Which class has the most hosts per network?",
+                type: "multiple",
+                options: [
+                    "Class A",
+                    "Class B",
+                    "Class C",
+                    "Class D"
+                ],
+                answer: 0,
+                explanation: "Class A has the most hosts (16,777,214) because it uses 24 bits for hosts (2^24 - 2). Class B has 65,534 hosts, Class C has 254 hosts, and Class D is for multicast, not host addressing. This is a fundamental concept in IP address class design."
+            },
+            {
+                question: "What is the purpose of Class E addresses?",
+                type: "multiple",
+                options: [
+                    "Experimental and future use",
+                    "Multicast communication",
+                    "Regular host addressing",
+                    "Broadcast communication"
+                ],
+                answer: 0,
+                explanation: "Class E addresses (240.0.0.0 to 255.255.255.255) are reserved for experimental and future use. They cannot be used for regular host addressing, multicast, or broadcast communication, which are common misconceptions about their purpose."
+            },
+            {
+                question: "How many bits are used for the network portion in a Class C address?",
+                type: "multiple",
+                options: [
+                    "24",
+                    "16",
+                    "8",
+                    "32"
+                ],
+                answer: 0,
+                explanation: "Class C addresses use 24 bits for the network portion (first three octets) because they must start with '110' in binary. 16 bits is for Class B, 8 bits for Class A, and 32 is the total IP address length. This is a key concept in understanding address class boundaries."
+            },
+            {
+                question: "What is the binary representation of 169.254.0.1?",
+                type: "binary",
+                options: [
+                    "10101001.11111110.00000000.00000001",
+                    "10101001.11111110.00000000.00000010",
+                    "10101001.11111110.00000000.00000100",
+                    "10101001.11111110.00000000.00001000"
+                ],
+                answer: 0,
+                explanation: "Each octet converts to 8 bits: 169 = 10101001 (128+32+8+1), 254 = 11111110 (128+64+32+16+8+4+2), 0 = 00000000, 1 = 00000001. The other options incorrectly double the last octet's value, which is a common binary conversion error."
+            },
+            {
+                question: "Which class is most suitable for large organizations?",
+                type: "multiple",
+                options: [
+                    "Class A",
+                    "Class B",
+                    "Class C",
+                    "Class D"
+                ],
+                answer: 0,
+                explanation: "Class A is most suitable for large organizations because it provides 16,777,214 hosts per network, allowing for massive internal networks. Class B and C would require multiple networks, and Class D is for multicast, not regular networks. This is a practical consideration in network design."
+            },
+            {
+                question: "What is the range of first octet values for Class B addresses?",
+                type: "multiple",
+                options: [
+                    "128-191",
+                    "192-223",
+                    "224-239",
+                    "240-255"
+                ],
+                answer: 0,
+                explanation: "Class B addresses range from 128-191 because they must start with '10' in binary. 192-223 is for Class C, 224-239 is for Class D, and 240-255 is for Class E. This is a fundamental concept in IP address classification."
+            },
+            {
+                question: "How many bits are used for the host portion in a Class A address?",
+                type: "multiple",
+                options: [
+                    "24",
+                    "16",
+                    "8",
+                    "32"
+                ],
+                answer: 0,
+                explanation: "Class A addresses use 24 bits for hosts (last three octets) because the first octet is used for the network portion. 16 bits is for Class B, 8 bits for Class C, and 32 is the total IP address length. This is a key concept in understanding address class boundaries."
+            },
+            {
+                question: "What is the binary representation of 224.0.0.1?",
+                type: "binary",
+                options: [
+                    "11100000.00000000.00000000.00000001",
+                    "11100000.00000000.00000000.00000010",
+                    "11100000.00000000.00000000.00000100",
+                    "11100000.00000000.00000000.00001000"
+                ],
+                answer: 0,
+                explanation: "Each octet converts to 8 bits: 224 = 11100000 (128+64+32), 0 = 00000000, 1 = 00000001. The other options incorrectly double the last octet's value, which is a common binary conversion error."
+            },
+            {
+                question: "Which class is used for multicast addresses?",
+                type: "multiple",
+                options: [
+                    "Class D",
+                    "Class A",
+                    "Class B",
+                    "Class C"
+                ],
+                answer: 0,
+                explanation: "Class D is used for multicast addresses (224.0.0.0 to 239.255.255.255) because it allows one sender to reach multiple receivers. Classes A, B, and C are for unicast communication (one-to-one), which is a fundamental distinction in IP addressing."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+
+        function shuffleQuestions() {
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+        }
+
+        function showQuestion(index) {
+            const question = shuffledQuestions[index];
+            const container = document.querySelector('.question-container');
+            const progress = document.querySelector('.progress');
+            const questionNumber = document.querySelector('.question-number');
+
+            // Update progress
+            progress.style.width = `${((index + 1) / questions.length) * 100}%`;
+            questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
+
+            // Update question
+            container.querySelector('.question').textContent = question.question;
+
+            // Show/hide binary table based on question type
+            const binaryTable = container.querySelector('.binary-table');
+            if (question.type === 'binary') {
+                binaryTable.style.display = 'table';
+            } else {
+                binaryTable.style.display = 'none';
+            }
+
+            // Update options
+            const optionsContainer = container.querySelector('.options');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, i) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = `${String.fromCharCode(65 + i)}) ${option}`;
+                div.addEventListener('click', () => selectOption(i));
+                optionsContainer.appendChild(div);
+            });
+
+            // Reset answer display
+            const answer = container.querySelector('.answer');
+            answer.style.display = 'none';
+            answer.querySelector('.answer-text').textContent = '';
+            answer.querySelector('.explanation').textContent = '';
+            container.querySelector('.next-button').style.display = 'block';
+        }
+
+        const cyberTitles = [
+            "Firewall Whisperer",
+            "Patch Master",
+            "Digital Ninja",
+            "The Exploit Exorcist",
+            "Byte Guardian",
+            "Root Access Royalty",
+            "Crypto Commander",
+            "Phish Slayer",
+            "Zero-Day Hero",
+            "The Encryptor",
+            "Net Sentinel",
+            "Red Team Rockstar",
+            "The Bug Hunter",
+            "Token Titan",
+            "Cyber Sage",
+            "Packet Paladin",
+            "Malware Mercenary",
+            "The Boolean Boss",
+            "Code Shield",
+            "The Kernel Keeper"
+        ];
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'cyber-particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            // Random direction and distance
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100 + Math.random() * 100;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            particle.style.setProperty('--tx', tx + 'px');
+            particle.style.setProperty('--ty', ty + 'px');
+            
+            // Random animation duration
+            const duration = 1 + Math.random();
+            particle.style.animation = `particleAnimation ${duration}s ease-out forwards`;
+            
+            return particle;
+        }
+
+        function createParticles(x, y, count) {
+            const container = document.getElementById('celebrationContainer');
+            for (let i = 0; i < count; i++) {
+                container.appendChild(createParticle(x, y));
+            }
+        }
+
+        function showCelebration(streak) {
+            const container = document.getElementById('celebrationContainer');
+            container.style.display = 'block';
+            container.innerHTML = '';
+
+            // Create celebration message
+            const message = document.createElement('div');
+            message.className = 'celebration-message';
+            
+            const title = document.createElement('h2');
+            title.textContent = `Streak ${streak}!`;
+            
+            const subtitle = document.createElement('p');
+            subtitle.textContent = cyberTitles[Math.floor(Math.random() * cyberTitles.length)];
+            
+            message.appendChild(title);
+            message.appendChild(subtitle);
+            container.appendChild(message);
+
+            // Create particles
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            createParticles(centerX, centerY, 50);
+
+            // Remove celebration after animation
+            setTimeout(() => {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }, 2000);
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            const correctAnswer = shuffledQuestions[currentQuestion].answer;
+            
+            // Remove all previous classes
+            options.forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+            });
+
+            // Add selected class to clicked option
+            options[index].classList.add('selected');
+
+            // Mark correct and incorrect answers
+            options.forEach((option, i) => {
+                if (i === correctAnswer) {
+                    option.classList.add('correct');
+                } else if (i === index && i !== correctAnswer) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            const answer = document.querySelector('.answer');
+            const answerText = answer.querySelector('.answer-text');
+            const explanation = answer.querySelector('.explanation');
+            
+            answerText.textContent = `Answer: ${String.fromCharCode(65 + correctAnswer)}) ${shuffledQuestions[currentQuestion].options[correctAnswer]}`;
+            explanation.textContent = shuffledQuestions[currentQuestion].explanation;
+            answer.style.display = 'block';
+
+            if (index === correctAnswer) {
+                score++;
+                // Check if score is a multiple of 5
+                if (score % 5 === 0) {
+                    showCelebration(score);
+                }
+            }
+        }
+
+        function showNextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion(currentQuestion);
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.querySelector('.question-container').style.display = 'none';
+            const resultContainer = document.querySelector('.result-container');
+            resultContainer.style.display = 'block';
+            document.getElementById('final-score').textContent = score;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            shuffleQuestions();
+            document.querySelector('.question-container').style.display = 'block';
+            document.querySelector('.result-container').style.display = 'none';
+            showQuestion(0);
+        }
+
+        // Initialize quiz
+        document.querySelector('.next-button').addEventListener('click', showNextQuestion);
+        document.querySelector('.restart-button').addEventListener('click', restartQuiz);
+        shuffleQuestions();
+        showQuestion(0);
+    </script>
+</body>
+</html> 
